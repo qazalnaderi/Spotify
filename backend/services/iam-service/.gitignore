@@ -3,7 +3,7 @@
 ../../.env
 ../../../../.env/
 ../../../.env/
-../../../.env/
+
 # Ignore other unnecessary files and directories
 core-service/
 __pycache__/
