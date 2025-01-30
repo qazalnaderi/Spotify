@@ -1,14 +1,10 @@
-# Ignore virtual environments
-../../.env
+# Ignore environment variable files
 .env
+../../.env
 ../../../../.env/
-# Ignore other temporary data
-# letsencrypt/
-# postgres_data/
-# ../data/dump.rdb
 
-
-__init__.py
-
-../../../../.env/
-../../core-service/
+# Ignore other unnecessary files and directories
+core-service/
+__pycache__/
+*.pyc
+*.log
