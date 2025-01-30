@@ -1,54 +1,34 @@
 import random
-from  core.redis.redis_client import redis_client
+from typing import Annotated
+from loguru import logger
+from fastapi import Depends
+from redis import Redis
+
+from  core.redis.redis_client import get_redis_client
+from  services.base_service import BaseService
 
 
-import json
-import logging
+class OTPService(BaseService):
+    def __init__(
+        self, redis_client: Annotated[Redis, Depends(get_redis_client)]
+    ) -> None:
+        super().__init__()
+        self.redis_client = redis_client
 
-class OTPService:
     @staticmethod
-    def generate_otp() -> str:
+    def __generate_otp() -> str:
         return str(random.randint(100000, 999999))
 
+    def send_otp(self, email: str):
+        otp = self.__generate_otp()
+        self.redis_client.setex(email, self.config.OTP_EXPIRE_TIME, otp)
+        logger.info(f"OTP {otp} sent to email {email}")
+        return otp
 
-    async def verify_otp(self, redis_key: str, otp: str) -> dict:
-        try:
-            temp_data = redis_client.get(redis_key)
-            if not temp_data:
-                logging.error(f"OTP not found in Redis for key: {redis_key}")
-                return {"status_code": 400, "message": "OTP has expired or registration data not found"}
+    def verify_otp(self, email: str, otp: str) -> bool:
+        stored_otp = self.redis_client.get(email)
+        return stored_otp is not None and stored_otp == otp
 
-            temp_data = json.loads(temp_data)
-            logging.info(f"temp data: {temp_data}")
-            stored_otp = temp_data.get("otp")
-            logging.info(f"Entered OTP: {otp}, Stored OTP: {stored_otp}")
-
-            if stored_otp != otp:
-                return {"status_code": 400, "message": "Invalid OTP"}
-            user_data = temp_data.get("user_data")
-            logging.info(f"user_data : {user_data}")
-
-            account_data = temp_data.get("account_data")
-            logging.info(f"account_data: {account_data}")
-
-
-            if not user_data or not account_data:
-                logging.error("User or account data is missing")  # Log if data is missing
-                return {"status_code": 500, "message": "User or account data is missing"}
-
-            return {
-                "status_code": 200,
-                "message": "OTP verified successfully",
-                "user_data": user_data,
-                "account_data": account_data
-            }
-
-        except Exception as e:
-            logging.error(f"Error during OTP verification: {e}")
-            return {"status_code": 500, "message": "An error occurred during OTP verification"}
-
-    async def delete_otp(self, redis_key: str):
-        try:
-            await redis_client.delete(redis_key)
-        except Exception as redis_error:
-            logging.warning(f"Failed to delete Redis key: {redis_key}")
+    def check_exist(self, email: str) -> bool:
+        stored_otp = self.redis_client.get(email)
+        return stored_otp is not None

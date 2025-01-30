@@ -37,3 +37,7 @@ class UserService(BaseService):
     async def get_user_by_username(self, username: str) -> User:
         logger.info(f"📥 Fetching user with username {username}")
         return self.user_repository.get_user_by_username(username)    
+
+    async def update_user(self, user_id: int, update_fields: Dict) -> User:
+        logger.info(f"🔃 Updating user with id {user_id}")
+        return self.user_repository.update_user(user_id, update_fields)    

@@ -7,6 +7,8 @@ from domain.models.user_model import User
 from domain.schemas.user_schema import (
     UserCreateSchema,
     UserResponseSchema,
+    VerifyOTPSchema,
+    VerifyOTPResponseSchema
 )
 from services.auth_services.auth_service import AuthService
 from services.register_service import RegisterService
@@ -25,3 +27,14 @@ async def register(
 ) -> UserResponseSchema:
     logger.info(f"Registering user with email:{user.email}")
     return await register_service.register_user(user)
+
+
+@user_router.post(
+    "/VerifyOTP", response_model=VerifyOTPResponseSchema, status_code=status.HTTP_200_OK
+)
+async def verify_otp(
+    verify_user_schema: VerifyOTPSchema,
+    register_service: Annotated[RegisterService, Depends()],
+) -> VerifyOTPResponseSchema:
+    logger.info(f"Verifying OTP for user with email {verify_user_schema.email}")
+    return await register_service.verify_user(verify_user_schema)

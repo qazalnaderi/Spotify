@@ -24,3 +24,15 @@ class UserRepository:
   def get_user_by_username(self, username: str) -> User:
     logger.info(f"📥Fetching user with username: {username}")
     return self.db.query(User).filter(User.username == username).first()
+
+
+  def update_user(self, user_id: int, updated_user: Dict) -> User:
+    user_query = self.db.query(User).filter(User.user_id == user_id)
+    db_user = user_query.first()
+    user_query.filter(User.user_id == user_id).update(
+        updated_user, synchronize_session=False
+    )
+    self.db.commit()
+    self.db.refresh(db_user)
+    logger.info(f"User {user_id} updated✅")
+    return db_user

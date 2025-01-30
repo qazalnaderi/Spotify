@@ -4,7 +4,9 @@ from fastapi import Depends, HTTPException, status
 
 from domain.schemas.user_schema import (
     UserCreateSchema,
-    UserResponseSchema
+    UserResponseSchema,
+    VerifyOTPSchema,
+    VerifyOTPResponseSchema
 )
 from services.auth_services.auth_service import AuthService
 from services.auth_services.otp_service import OTPService
@@ -43,12 +45,34 @@ class RegisterService(BaseService):
             )    
 
         new_user = await self.user_service.create_user(user)
-        #TODO send otp
+        otp = self.otp_service.send_otp(new_user.email)
         logger.info(f"User with email: {user.email} created successfully")
         return UserResponseSchema(
             first_name= new_user.first_name ,
             last_name= new_user.last_name ,
             email= new_user.email,
+            is_verified=new_user.is_verified,
             username= new_user.username,
             message = 'user created✅'
+        )
+    async def verify_user(
+        self, verify_user_schema: VerifyOTPSchema
+    ) -> VerifyOTPResponseSchema:
+        if not self.otp_service.verify_otp(
+            verify_user_schema.email, verify_user_schema.otp
+        ):
+            logger.error(f"Invalid OTP for mobile number {verify_user_schema.email}❌")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP❌"
+            )
+
+        user = await self.user_service.get_user_by_email(
+            verify_user_schema.email
+        )
+
+        await self.user_service.update_user(user.user_id, {"is_verified": True})
+
+        logger.info(f"User with mobile number {verify_user_schema.email} verified✅")
+        return VerifyOTPResponseSchema(
+            verified=True, message="User Created Successfully, OTP Sent To The Email✅"
         )

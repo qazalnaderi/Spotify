@@ -2,7 +2,6 @@ from pydantic import BaseModel, ConfigDict
 from datetime import date, datetime
 from typing import Optional
 
-
 class UserBase(BaseModel):
     first_name: str 
     last_name: str 
@@ -17,9 +16,12 @@ class UserCreateSchema(UserBase):
 class UserResponseSchema(UserBase):
     message: str
 
-
-
-
-class RegistrationResponse(BaseModel):
-    message: str
+class VerifyOTPSchema(BaseModel):
+    email: str
+    otp: str
     model_config = ConfigDict(from_attributes=True)
+
+class VerifyOTPResponseSchema(BaseModel):
+    email: str
+    otp_valid: bool
+    message: str
