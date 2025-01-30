@@ -3,8 +3,12 @@
 .env
 ../../../../.env/
 # Ignore other temporary data
-letsencrypt/
-postgres_data/
-../data/dump.rdb
+# letsencrypt/
+# postgres_data/
+# ../data/dump.rdb
 
 
+__init__.py
+
+../../../../.env/
+../../core-service/
