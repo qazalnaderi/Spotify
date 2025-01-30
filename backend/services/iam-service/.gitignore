@@ -1,0 +1,10 @@
+# Ignore virtual environments
+../../.env
+.env
+
+# Ignore other temporary data
+letsencrypt/
+postgres_data/
+../data/dump.rdb
+
+
