@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     DATABASE_PORT: int = 5432
     DATABASE_USERNAME: str = "postgres"
     DEBUG_MODE: bool = False
-    #REDIS_URL: str = "localhost"
-    REDIS_URL: str = "redis"
+    REDIS_URL: str = "localhost"
+    # REDIS_URL: str = "redis"
     REDIS_PORT: int = 6379
     JWT_SECRET_KEY : str = "3ffdda4a51a141cff4485a36f9cd137287f2526c1edb8300cd678ab96a49d1bd"
     JWT_ALGORITHM : str = "HS256"
