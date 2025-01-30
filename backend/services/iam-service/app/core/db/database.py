@@ -1,29 +1,28 @@
-import sqlalchemy
+from databases import DatabaseURL
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from fastapi import HTTPException
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy_utils import database_exists, create_database
+from loguru import logger
+
+# DATABASE_URL = "postgresql://postgres:admin@postgres_container:5432/spotify"
+DATABASE_URL = "postgresql://postgres:admin@localhost:5432/spotify"
+
+engine = create_engine(DATABASE_URL, future=True)
+session_local = sessionmaker(autoflush=False, autocommit=False, bind=engine)
+
+Base = declarative_base()
 
 
-SQLALCHEMY_DATABASE_URL = ""
+def init_db() -> bool:
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database Initialized")
+    return True
 
 
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False)
-Base = sqlalchemy.orm.declarative_base()
-
-AsyncSessionLocal = sessionmaker(
-    bind=engine, 
-    class_=AsyncSession,  
-    expire_on_commit=False, 
-)
-
-async def get_db():
-    async with AsyncSessionLocal() as db:
-        try:
-            yield db  
-        except SQLAlchemyError as e:
-            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-        finally:
-            await db.close()
-
+def get_db():
+    db = session_local()
+    try:
+        yield db
+    finally:
+        db.close()

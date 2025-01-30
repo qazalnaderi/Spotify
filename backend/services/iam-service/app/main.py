@@ -9,17 +9,9 @@ logger = logging.getLogger(__name__)
 logger.info("Custom logging is configured.")
 import smtplib
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.endpoints.account_route import user_router
-from app.api.endpoints.login_route import login_router
-from app.api.endpoints.profile_management_route import profile_router
-from app.api.endpoints.contacts_route import contact_router
-from app.api.endpoints.email_route import email_router
-from app.api.endpoints.report_route import report_router
-from app.api.endpoints.admin_route import admin_router
-from app.api.endpoints.auth_route import auth_router
 from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
-
+from api.v1.endpoints.user_route import user_router
 app = FastAPI()
 
 
@@ -32,6 +24,8 @@ app.add_middleware(
 )
 
 logging.info("IAM Service Started")
+
+app.include_router(user_router, prefix="/api/v1/users", tags=["users"])
 
 @app.get("/")
 async def root():

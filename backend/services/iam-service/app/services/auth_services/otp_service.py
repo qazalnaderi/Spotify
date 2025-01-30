@@ -1,5 +1,5 @@
 import random
-from ...core.redis.redis_client import redis_client
+from  core.redis.redis_client import redis_client
 
 
 import json
