@@ -1,22 +1,26 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  redis:
-    image: redis:latest
-    container_name: redis
-    command: redis-server /usr/local/etc/redis/redis.conf
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    command:
+      - "--api.insecure=true"  # Enable Traefik dashboard
+      - "--providers.docker=true"  # Enable Docker provider
+      - "--entrypoints.web.address=:80"  # Define HTTP entrypoint
+      - "--entrypoints.websecure.address=:443"  # Define HTTPS entrypoint
     ports:
-      - "65000:6379"
+      - "80:80"  # Expose HTTP port
+      - "443:443"  # Expose HTTPS port
+      - "8080:8080"  # Expose Traefik dashboard
     volumes:
-      - ./data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"  # Docker socket for service discovery
+      - "./letsencrypt:/letsencrypt"  # Volume for certificates storage
     networks:
-      backend:
-
-    restart: unless-stopped
+      - app-network
 
   postgres:
-    container_name: new_postgres_container
+    container_name: postgres_container
     image: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -24,125 +28,68 @@ services:
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../services/iam-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     networks:
-      - backend
+      - app-network
     restart: unless-stopped
     expose:
       - 5432
 
   pgadmin:
-    container_name: new_pgadmin_container
+    container_name: pgadmin_container
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_DISABLE_CHECK_FOR_UPDATES: 'True'
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - backend
+      - app-network
     restart: unless-stopped
 
-  # traefik:
-  #   image: traefik:v2.10
-  #   container_name: traefik
-  #   command:
-  #     - "--api.insecure=true"  # Enable Traefik dashboard (optional)
-  #     - "--providers.docker=true"  # Enable Docker provider to listen to Docker events
-  #     - "--entrypoints.web.address=:8081"  # HTTP (port 80)
-  #     - "--entrypoints.websecure.address=:8443"  # HTTPS (port 443)
-  #   ports:
-  #     - "9000:8081"  # HTTP on port 9080
-  #     - "9443:8443"  # HTTPS on port 8443
-  #     - "9080:8080"  # Traefik Dashboard (for testing purposes)
-  #   volumes:
-  #     - "/var/run/docker.sock:/var/run/docker.sock"  # Traefik access to Docker events
-  #     - "./letsencrypt:/letsencrypt"  # Volume for certificates storage
-  #   networks:
-  #     -backend
+  redis:
+    image: redis
+    container_name: redis
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - app-network
+    restart: unless-stopped
 
-
-
-  # iam-service:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile  
-  #   environment:
-  #       - DATABASE_DIALECT=postgresql+asyncpg
-  #       - DATABASE_HOSTNAME=new_postgres_container
-  #       - DATABASE_NAME=mailservice
-  #       - DATABASE_PASSWORD=admin
-  #       - DATABASE_PORT=5432
-  #       - DATABASE_USERNAME=postgres
-  #       - DEBUG_MODE=False
-  #       - REDIS_URL=redis  
-  #       - REDIS_PORT=6379
-  #   depends_on:
-  #     - redis  
-  #     - postgres
-  #     - poste
-
-  #   networks:
-  #     -backend
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.iam-service.rule=Host(`iam.localhost`)"
-  #     - "traefik.http.routers.iam-service.entrypoints=web"
-  #     - "traefik.http.services.iam-service.loadbalancer.server.port=80"
-
-  # mongo:
-  #   image: mongo:latest
-  #   container_name: mongo_container
-  #   ports:
-  #     - "27017:27017"
-  #   networks:
-  #     - backend
-  #   volumes:
-  #     - mongo-data:/data/db
-  #   restart: unless-stopped
-
-  # media-service:
-  #   build:
-  #     context: ../media-service
-  #     dockerfile: Dockerfile
-  #   container_name: media_service
-  #   environment:
-  #     - DATABASE_URL=mongodb://mongo:27017
-  #     - DATABASE_NAME=
-  #     - FILE_STORAGE_PATH=app/media
-  #     - IAM_URL=http://iam-service:80
-  #     - GRPC_PORT=50051
-  #   networks:
-  #     - backend
-  
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.media-service.rule=Host(`media.localhost`)"
-  #     - "traefik.http.routers.media-service.entrypoints=web"
-  #     - "traefik.http.services.media-service.loadbalancer.server.port=80"
-    
-  #   restart: unless-stopped
-  #   ports:
-  #     - "50051:50051" # gRPC port
-  #     - "4000:80"     # Add this line to map HTTP port
-  #   depends_on:
-  #     - mongo
-
+  iam:
+    build:
+      context:  ../services/iam-service
+      dockerfile: Dockerfile
+    container_name: iam_service
+#    ports:
+#      - "8020:8020"
+    networks:
+      - app-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.iam-service.rule=Host(`iam.localhost`)"
+      - "traefik.http.routers.iam-service.entrypoints=web"
+      - "traefik.http.services.iam-service.loadbalancer.server.port=80"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
 
 networks:
-  backend:
-    driver: bridge  # Use the bridge driver to enable inter-container communication
+  app-network:
+    driver: bridge
 
 volumes:
   postgres:
   pgadmin:
-  # esdata:
-  # mongo-data:
-  # letsencrypt:
-  #   driver: local
+  letsencrypt:
+    driver: local
