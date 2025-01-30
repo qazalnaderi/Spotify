@@ -22,6 +22,5 @@ class VerifyOTPSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class VerifyOTPResponseSchema(BaseModel):
-    email: str
-    otp_valid: bool
+    verified: bool
     message: str
