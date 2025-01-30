@@ -1,3 +1,6 @@
 ../../.env/
 core-service/
 ../../.env/
+.env
+../../.env
+../../../../.env/
