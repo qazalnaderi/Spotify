@@ -1,7 +1,7 @@
 # Ignore virtual environments
 ../../.env
 .env
-
+../../../../.env/
 # Ignore other temporary data
 letsencrypt/
 postgres_data/
