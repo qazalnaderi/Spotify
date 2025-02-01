@@ -13,7 +13,6 @@ from services.auth_services.otp_service import OTPService
 from services.base_service import BaseService
 from services.user_service import UserService
 
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/users/Token")
 
 class RegisterService(BaseService):
     def __init__(
@@ -76,3 +75,5 @@ class RegisterService(BaseService):
         return VerifyOTPResponseSchema(
             verified=True, message="User Created Successfully, OTP Sent To The Email✅"
         )
+
+    #TODO add resend otp    

@@ -1,8 +1,14 @@
 from passlib.context import CryptContext
 
+from  services.base_service import BaseService
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-class HashService:
+
+class HashService(BaseService):
+    def __init__(self) -> None:
+        super().__init__()
+
     @staticmethod
     def hash_password(password: str) -> str:
         return pwd_context.hash(password)

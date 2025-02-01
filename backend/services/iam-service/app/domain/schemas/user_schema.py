@@ -24,3 +24,8 @@ class VerifyOTPSchema(BaseModel):
 class VerifyOTPResponseSchema(BaseModel):
     verified: bool
     message: str
+
+
+class UserLoginSchema(BaseModel):
+    email: str
+    password: str

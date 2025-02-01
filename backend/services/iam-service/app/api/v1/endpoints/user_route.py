@@ -8,8 +8,10 @@ from domain.schemas.user_schema import (
     UserCreateSchema,
     UserResponseSchema,
     VerifyOTPSchema,
-    VerifyOTPResponseSchema
+    VerifyOTPResponseSchema,
+    UserLoginSchema
 )
+from domain.schemas.token_schema import TokenSchema
 from services.auth_services.auth_service import AuthService
 from services.register_service import RegisterService
 from services.user_service import UserService
@@ -38,3 +40,15 @@ async def verify_otp(
 ) -> VerifyOTPResponseSchema:
     logger.info(f"Verifying OTP for user with email {verify_user_schema.email}")
     return await register_service.verify_user(verify_user_schema)
+
+#TODO check if it'd be better to get username instead of email
+@user_router.post("/Token", response_model=TokenSchema, status_code=status.HTTP_200_OK)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    auth_service: Annotated[AuthService, Depends()],
+) -> TokenSchema:
+
+    logger.info(f"Logging in user with email {form_data.username}")
+    return await auth_service.authenticate_user(
+        UserLoginSchema(email=form_data.username, password=form_data.password)
+    )    
