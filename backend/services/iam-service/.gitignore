@@ -5,7 +5,6 @@
 ../../../.env/
 __init__
 # Ignore other unnecessary files and directories
-core-service/
 __pycache__/
 *.pyc
 *.log
