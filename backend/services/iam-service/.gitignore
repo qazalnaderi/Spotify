@@ -3,7 +3,6 @@
 ../../.env
 ../../../../.env/
 ../../../.env/
-../../../.env/
 __init__
 # Ignore other unnecessary files and directories
 __pycache__/
@@ -12,3 +11,4 @@ __pycache__/
 letsencrypt
 redis.conf
 data
+../../../.env/
