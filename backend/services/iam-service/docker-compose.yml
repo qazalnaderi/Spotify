@@ -28,7 +28,7 @@ services:
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
-      - ../services/iam-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../iam-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     networks:
@@ -65,24 +65,24 @@ services:
       - app-network
     restart: unless-stopped
 
-  iam:
-    build:
-      context:  ../services/iam-service
-      dockerfile: Dockerfile
-    container_name: iam_service
-#    ports:
-#      - "8020:8020"
-    networks:
-      - app-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.iam-service.rule=Host(`iam.localhost`)"
-      - "traefik.http.routers.iam-service.entrypoints=web"
-      - "traefik.http.services.iam-service.loadbalancer.server.port=80"
-    restart: unless-stopped
-    depends_on:
-      - postgres
-      - redis
+#   iam:
+#     build:
+#       context:  ../iam-service
+#       dockerfile: Dockerfile
+#     container_name: iam_service
+# #    ports:
+# #      - "8020:8020"
+#     networks:
+#       - app-network
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.iam-service.rule=Host(`iam.localhost`)"
+#       - "traefik.http.routers.iam-service.entrypoints=web"
+#       - "traefik.http.services.iam-service.loadbalancer.server.port=80"
+#     restart: unless-stopped
+#     depends_on:
+#       - postgres
+#       - redis
 
 networks:
   app-network:
