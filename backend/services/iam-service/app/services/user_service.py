@@ -34,6 +34,10 @@ class UserService(BaseService):
         logger.info(f"📥 Fetching user with email {email}")
         return self.user_repository.get_user_by_email(email)
 
+    async def get_user_by_id(self, user_id: int) -> User:
+        logger.info(f"📥 Fetching user with id {user_id}")
+        return self.user_repository.get_user_by_id(user_id)    
+
     async def get_user_by_username(self, username: str) -> User:
         logger.info(f"📥 Fetching user with username {username}")
         return self.user_repository.get_user_by_username(username)    

@@ -11,7 +11,7 @@ from  services.user_service import UserService
 from domain.schemas.token_schema import TokenDataSchema, TokenSchema
 from domain.schemas.user_schema import UserLoginSchema
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/users/Token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/users/login")
 
 
 class AuthService(BaseService):
@@ -86,7 +86,7 @@ async def get_current_user(
             algorithms=[user_service.config.JWT_ALGORITHM],
         )
         user_id: str = payload.get("sub")
-        user = await user_service.get_user(user_id)
+        user = await user_service.get_user_by_id(user_id)
         if user_id is None:
             logger.error("Could not validate credentials")
             raise credentials_exception

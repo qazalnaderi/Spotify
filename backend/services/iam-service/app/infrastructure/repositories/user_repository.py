@@ -26,6 +26,10 @@ class UserRepository:
     return self.db.query(User).filter(User.username == username).first()
 
 
+  def get_user_by_id(self,  user_id: int) -> User:
+    logger.info(f"📥Fetching user with id: {user_id}")
+    return self.db.query(User).filter(User.user_id == user_id).first()
+
   def update_user(self, user_id: int, updated_user: Dict) -> User:
     user_query = self.db.query(User).filter(User.user_id == user_id)
     db_user = user_query.first()

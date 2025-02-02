@@ -29,3 +29,13 @@ class VerifyOTPResponseSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     email: str
     password: str
+
+
+class UserInfoSchema(BaseModel):
+    user_id: int
+    first_name: str
+    last_name: str
+    email: str
+    username: str
+    class Config:
+        from_attributes = True

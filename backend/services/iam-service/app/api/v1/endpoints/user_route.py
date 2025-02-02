@@ -9,16 +9,17 @@ from domain.schemas.user_schema import (
     UserResponseSchema,
     VerifyOTPSchema,
     VerifyOTPResponseSchema,
-    UserLoginSchema
+    UserLoginSchema,
+    UserInfoSchema
 )
 from domain.schemas.token_schema import TokenSchema
 from services.auth_services.auth_service import AuthService
 from services.register_service import RegisterService
 from services.user_service import UserService
-
+from services.auth_services.auth_service import get_current_user
 user_router = APIRouter()
 
-
+#TODO add check username password email
 @user_router.post(
     "/Register",
     response_model=UserResponseSchema,
@@ -42,7 +43,7 @@ async def verify_otp(
     return await register_service.verify_user(verify_user_schema)
 
 #TODO check if it'd be better to get username instead of email
-@user_router.post("/Token", response_model=TokenSchema, status_code=status.HTTP_200_OK)
+@user_router.post("/login", response_model=TokenSchema, status_code=status.HTTP_200_OK)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     auth_service: Annotated[AuthService, Depends()],
@@ -52,3 +53,9 @@ async def login_for_access_token(
     return await auth_service.authenticate_user(
         UserLoginSchema(email=form_data.username, password=form_data.password)
     )    
+
+
+@user_router.get("/Me", response_model=UserInfoSchema, status_code=status.HTTP_200_OK)
+async def read_me(current_user: User = Depends(get_current_user)) -> UserInfoSchema:
+    logger.info(f"Getting user with email {current_user.email}")
+    return current_user
