@@ -33,6 +33,7 @@ class UserLoginSchema(BaseModel):
 
 class UserInfoSchema(BaseModel):
     user_id: int
+    library_id: int
     first_name: str
     last_name: str
     email: str
