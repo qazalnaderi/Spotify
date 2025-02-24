@@ -3,6 +3,7 @@ CREATE DATABASE spotify;
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
+    library_id INT UNIQUE NOT NULL DEFAULT nextval('users_user_id_seq'),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -11,7 +12,6 @@ CREATE TABLE users (
     username VARCHAR(100) UNIQUE NOT NULL,
     password TEXT NOT NULL, 
     profile_url TEXT,
-    library_id SERIAL UNIQUE,
     created_at TIMESTAMP DEFAULT now()
 );
 
@@ -65,28 +65,23 @@ CREATE TABLE playlist_song (
     PRIMARY KEY (playlist_id, song_id)
 );
 
-CREATE TABLE libraries (
-    library_id SERIAL PRIMARY KEY,
-    user_id INT UNIQUE REFERENCES users(user_id) ON DELETE CASCADE
-);
-
 
 CREATE TABLE library_songs (
-    library_id INT REFERENCES libraries(library_id) ON DELETE CASCADE,
+    library_id INT REFERENCES users(library_id) ON DELETE CASCADE,
     song_id INT REFERENCES songs(song_id) ON DELETE CASCADE,
     added_at TIMESTAMP DEFAULT now(),
     PRIMARY KEY (library_id, song_id)
 );
 
 CREATE TABLE library_albums (
-    library_id INT REFERENCES libraries(library_id) ON DELETE CASCADE,
+    library_id INT REFERENCES users(library_id) ON DELETE CASCADE,
     album_id INT REFERENCES albums(album_id) ON DELETE CASCADE,
     added_at TIMESTAMP DEFAULT now(),
     PRIMARY KEY (user_id, album_id)
 );
 
 CREATE TABLE library_playlists (
-    library_id INT REFERENCES libraries(library_id) ON DELETE CASCADE,
+    library_id INT REFERENCES users(library_id) ON DELETE CASCADE,
     playlist_id INT REFERENCES playlists(playlist_id) ON DELETE CASCADE,
     added_at TIMESTAMP DEFAULT now(),
     PRIMARY KEY (user_id, playlist_id)
