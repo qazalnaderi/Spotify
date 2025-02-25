@@ -13,7 +13,7 @@ from services.auth_services.otp_service import OTPService
 from services.base_service import BaseService
 from services.user_service import UserService
 
-
+#TODO check pass strength
 class RegisterService(BaseService):
     def __init__(
         self,
@@ -41,7 +41,10 @@ class RegisterService(BaseService):
             logger.error(f"User with mobile number {user.username} already exists")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Username taken"
-            )    
+            ) 
+        if user.password != user.confirm_password:
+            raise HTTPException(status_code=400, detail='Password confirmation does not match')
+       
 
         new_user = await self.user_service.create_user(user)
         otp = self.otp_service.send_otp(new_user.email)
