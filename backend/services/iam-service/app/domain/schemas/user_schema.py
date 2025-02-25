@@ -40,3 +40,11 @@ class UserInfoSchema(BaseModel):
     username: str
     class Config:
         from_attributes = True
+
+class ResendOTPSchema(BaseModel):
+    email: str
+
+class ResendOTPResponseSchema(BaseModel):
+    email: str
+    OTP: str
+    message: str        

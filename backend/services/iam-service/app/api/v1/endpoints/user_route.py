@@ -10,8 +10,10 @@ from domain.schemas.user_schema import (
     VerifyOTPSchema,
     VerifyOTPResponseSchema,
     UserLoginSchema,
-    UserInfoSchema
-)
+    UserInfoSchema,
+    ResendOTPResponseSchema,
+    ResendOTPSchema
+        )
 from domain.schemas.token_schema import TokenSchema
 from services.auth_services.auth_service import AuthService
 from services.register_service import RegisterService
@@ -54,8 +56,19 @@ async def login_for_access_token(
         UserLoginSchema(email=form_data.username, password=form_data.password)
     )    
 
+@user_router.post(
+    "/ResendOTP",
+    response_model=ResendOTPResponseSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def resend_otp(
+    resend_otp_schema: ResendOTPSchema,
+    register_service: Annotated[RegisterService, Depends()],
+) -> ResendOTPResponseSchema:
+    logger.info(f"Resending OTP for user with email {resend_otp_schema.email}")
+    return await register_service.resend_otp(resend_otp_schema)
 
 @user_router.get("/Me", response_model=UserInfoSchema, status_code=status.HTTP_200_OK)
 async def read_me(current_user: User = Depends(get_current_user)) -> UserInfoSchema:
-    logger.info(f"Getting user with email {current_user.email}")
+    logger.info(f"📥 Getting user with email {current_user.email}")
     return current_user
