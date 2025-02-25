@@ -55,7 +55,7 @@ class RegisterService(BaseService):
             email= new_user.email,
             is_verified=new_user.is_verified,
             username= new_user.username,
-            message = 'user created✅'
+            message = 'User Created Successfully, OTP Sent To The Email✅'
         )
     async def verify_user(
         self, verify_user_schema: VerifyOTPSchema
@@ -74,9 +74,9 @@ class RegisterService(BaseService):
 
         await self.user_service.update_user(user.user_id, {"is_verified": True})
 
-        logger.info(f"User with mobile number {verify_user_schema.email} verified✅")
+        logger.info(f"User with email{verify_user_schema.email} verified✅")
         return VerifyOTPResponseSchema(
-            verified=True, message="User Created Successfully, OTP Sent To The Email✅"
+            verified=True, message="User Verified Successfully"
         )
 
     #TODO add resend otp    
