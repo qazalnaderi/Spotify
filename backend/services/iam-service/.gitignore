@@ -1,0 +1,14 @@
+# Ignore environment variable files
+.env
+../../.env
+../../../../.env/
+../../../.env/
+__init__
+# Ignore other unnecessary files and directories
+__pycache__/
+*.pyc
+*.log
+letsencrypt
+redis.conf
+data
+../../../.env/
